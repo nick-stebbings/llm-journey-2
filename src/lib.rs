@@ -48,7 +48,7 @@ impl DirStats {
             if entry.file_type().is_file() {
                 let is_ignored = ignored_patterns.iter().any(|pattern| {
                     let pattern = glob::Pattern::new(pattern).expect("Invalid glob pattern");
-                    pattern.matches_path(entry.path())
+                    pattern.matches_path(entry.path().strip_prefix(path).unwrap())
                 });
                 if !is_ignored {
                     self.file_count += 1;
