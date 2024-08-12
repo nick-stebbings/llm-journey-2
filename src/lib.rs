@@ -32,8 +32,8 @@ impl DirStats {
             }
         }
 
-        let repo = Repository::discover(path).map_err(|e| e.into())?;
-        let revwalk = repo.revwalk().map_err(|e| e.into())?;
+        let repo = Repository::discover(path).map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+        let revwalk = repo.revwalk().map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
         self.commit_count = revwalk.count() as usize;
 
         Ok(())
