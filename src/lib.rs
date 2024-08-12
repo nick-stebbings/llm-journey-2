@@ -1,12 +1,12 @@
-extern crate walkdir;
 extern crate git2;
+extern crate walkdir;
 
-use walkdir::WalkDir;
 use git2::Repository;
-use std::path::Path;
 use std::fs::File;
 use std::io::{self, BufRead};
+use std::path::Path;
 use std::path::PathBuf;
+use walkdir::WalkDir;
 
 pub struct DirStats {
     pub file_count: usize,
@@ -32,9 +32,13 @@ impl DirStats {
             }
         }
 
-        let repo = Repository::discover(path).map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
-        let revwalk = repo.revwalk().map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
-        self.commit_count = revwalk.count() as usize;
+        let repo = Repository::discover(path);
+        if let Ok(r) = repo {
+            let revwalk = r
+                .revwalk()
+                .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+            self.commit_count = revwalk.count() as usize;
+        }
 
         Ok(())
     }
