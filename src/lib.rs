@@ -27,13 +27,33 @@ impl DirStats {
 
     // Method to gather stats for a given directory
     pub fn gather_stats(&mut self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
+        // Read .gitignore file and store ignored patterns
+        let gitignore_path = path.join(".gitignore");
+        let mut ignored_patterns = Vec::new();
+        if gitignore_path.exists() {
+            let file = File::open(&gitignore_path)?;
+            let reader = io::BufReader::new(file);
+            for line in reader.lines() {
+                let line = line?;
+                if !line.starts_with('#') && !line.trim().is_empty() {
+                    ignored_patterns.push(line);
+                }
+            }
+        }
+
         // Iterate over all entries in the directory
         for entry in WalkDir::new(path) {
             let entry = entry?;
             // If the entry is a file, increment file count and line count
             if entry.file_type().is_file() {
-                self.file_count += 1;
-                self.line_count += count_lines(&entry.path())?;
+                let is_ignored = ignored_patterns.iter().any(|pattern| {
+                    let pattern = glob::Pattern::new(pattern).unwrap();
+                    pattern.matches_path(entry.path())
+                });
+                if !is_ignored {
+                    self.file_count += 1;
+                    self.line_count += count_lines(&entry.path())?;
+                }
             }
         }
 
