@@ -41,10 +41,16 @@ impl DirStats {
         let repo = Repository::discover(path);
         // If successful, count the number of commits
         if let Ok(r) = repo {
-            let revwalk = r
-                .revwalk()
-                .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
-            self.commit_count = revwalk.count() as usize;
+            let mut revwalk = r.revwalk().map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+            revwalk.push_range("0..HEAD")?;
+            revwalk.set_sorting(git2::Sort::TIME)?;
+            self.commit_count += revwalk.count() as usize;
+
+            // Iterate over the submodules and recursively gather stats
+            for submodule in r.submodules()? {
+                let submodule_path = path.join(submodule.path());
+                self.gather_stats(&submodule_path)?;
+            }
         }
 
         Ok(())
