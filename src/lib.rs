@@ -42,7 +42,7 @@ impl DirStats {
         // If successful, count the number of commits
         if let Ok(r) = repo {
             let mut revwalk = r.revwalk().map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
-            revwalk.push_range("HEAD~10000..HEAD")?;
+            revwalk.push_range("HEAD")?;
             revwalk.set_sorting(git2::Sort::TIME)?;
             self.commit_count += revwalk.count() as usize;
 
