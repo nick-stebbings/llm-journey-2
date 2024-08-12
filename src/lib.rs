@@ -71,7 +71,10 @@ fn count_lines(path: &Path) -> io::Result<usize> {
 fn find_first_commit_hash(repo: &Repository) -> Result<String, git2::Error> {
     let mut revwalk = repo.revwalk()?;
     revwalk.push_head()?;
-    revwalk.set_sorting(git2::Sort::REVERSE)?;
-    let oid = revwalk.last()?.ok_or(git2::Error::from_str("Repository has no commits"))?;
-    Ok(oid.to_string())
+    revwalk.set_sorting(git2::Sort::NONE)?;
+    let oid = revwalk.last();
+    if let Some(Ok(hash)) = oid {
+        return Ok(hash.to_string())
+    };
+    return Ok("No commits".to_string())
 }
