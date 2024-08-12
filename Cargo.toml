@@ -1,0 +1,9 @@
+[package]
+name = "dir_stats"
+version = "0.1.0"
+authors = ["Your Name <your.email@example.com>"]
+edition = "2018"
+
+[dependencies]
+walkdir = "2.3.2"
+git2 = "0.13.22"
