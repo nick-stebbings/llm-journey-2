@@ -17,7 +17,8 @@ fn main() {
     // Create a new DirStats object
     let mut stats = DirStats::new();
     // Gather stats for the provided path
-    if let Err(err) = stats.gather_stats(&args[1]) {
+    let path = std::path::Path::new(&args[1]);
+    if let Err(err) = stats.gather_stats(&path) {
         eprintln!("Error gathering stats: {}", err);
         process::exit(1);
     }
