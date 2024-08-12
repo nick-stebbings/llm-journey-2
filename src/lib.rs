@@ -42,7 +42,8 @@ impl DirStats {
         // If successful, count the number of commits
         if let Ok(r) = repo {
             let mut revwalk = r.revwalk().map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
-            revwalk.push_range("HEAD")?;
+            let first_commit_hash = find_first_commit_hash(&r)?;
+            revwalk.push_range(&format!("{}..HEAD", first_commit_hash))?;
             revwalk.set_sorting(git2::Sort::TIME)?;
             for _ in revwalk {
                 self.commit_count += 1;
@@ -65,4 +66,12 @@ fn count_lines(path: &Path) -> io::Result<usize> {
     let reader = io::BufReader::new(file);
     let line_count = reader.lines().count();
     Ok(line_count)
+}
+// Function to find the hash of the first commit
+fn find_first_commit_hash(repo: &Repository) -> Result<String, git2::Error> {
+    let mut revwalk = repo.revwalk()?;
+    revwalk.push_head()?;
+    revwalk.set_sorting(git2::Sort::REVERSE)?;
+    let oid = revwalk.last()?.ok_or(git2::Error::from_str("Repository has no commits"))?;
+    Ok(oid.to_string())
 }
