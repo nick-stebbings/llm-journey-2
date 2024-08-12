@@ -44,7 +44,9 @@ impl DirStats {
             let mut revwalk = r.revwalk().map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
             revwalk.push_range("HEAD")?;
             revwalk.set_sorting(git2::Sort::TIME)?;
-            self.commit_count += revwalk.count() as usize;
+            for _ in revwalk {
+                self.commit_count += 1;
+            }
 
             // Iterate over the submodules and recursively gather stats
             for submodule in r.submodules()? {
