@@ -23,7 +23,7 @@ impl DirStats {
         }
     }
 
-    pub fn gather_stats(&mut self, path: &Path) -> io::Result<()> {
+    pub fn gather_stats(&mut self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
         for entry in WalkDir::new(path) {
             let entry = entry?;
             if entry.file_type().is_file() {
@@ -32,8 +32,8 @@ impl DirStats {
             }
         }
 
-        let repo = Repository::discover(path)?;
-        let revwalk = repo.revwalk()?;
+        let repo = Repository::discover(path).map_err(|e| e.into())?;
+        let revwalk = repo.revwalk().map_err(|e| e.into())?;
         self.commit_count = revwalk.count() as usize;
 
         Ok(())
