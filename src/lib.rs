@@ -47,7 +47,7 @@ impl DirStats {
             // If the entry is a file, increment file count and line count
             if entry.file_type().is_file() {
                 let is_ignored = ignored_patterns.iter().any(|pattern| {
-                    let pattern = glob::Pattern::new(pattern).unwrap();
+                    let pattern = glob::Pattern::new(pattern).expect("Invalid glob pattern");
                     pattern.matches_path(entry.path())
                 });
                 if !is_ignored {
